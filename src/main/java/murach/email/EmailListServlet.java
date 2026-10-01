@@ -38,14 +38,14 @@ public class EmailListServlet extends HttpServlet {
             User user = new User(firstName, lastName, email);
             UserDB.insert(user);
 
-            try {
-                MailUtil.sendWelcomeEmail(user);
-            } catch (MessagingException e) {
-                throw new ServletException(
-                    "Could not send welcome email.",
-                    e
-                );
-            }
+            // Gửi email chào mừng trong luồng phụ (không làm nghẽn/chậm trang web)
+            new Thread(() -> {
+                try {
+                    MailUtil.sendWelcomeEmail(user);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }).start();
             
             // set User object in request object and set URL
             request.setAttribute("user", user);
