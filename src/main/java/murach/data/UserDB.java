@@ -1,12 +1,31 @@
 package murach.data;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 import murach.business.User;
 
 public class UserDB {
+
     public static long insert(User user) {
-        // Trong bài lab/ví dụ cơ bản, phương thức này giả lập lưu trữ dữ liệu
-        // Sau này khi kết nối cơ sở dữ liệu thật, bạn sẽ viết câu lệnh INSERT SQL ở đây
-        System.out.println("User inserted: " + user.getEmail());
-        return 1;
+        EntityManager em =
+            JpaUtil.getEntityManagerFactory().createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+
+        try {
+            tx.begin();
+
+            em.persist(user);
+
+            tx.commit();
+            return user.getId();
+        } catch (RuntimeException e) {
+            if (tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
     }
 }

@@ -3,9 +3,11 @@ package murach.email;
 import java.io.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
+import jakarta.mail.MessagingException;
 
 import murach.business.User;
 import murach.data.UserDB;
+import murach.util.MailUtil;
 
 public class EmailListServlet extends HttpServlet {
 
@@ -35,6 +37,15 @@ public class EmailListServlet extends HttpServlet {
             // store data in User object and save User object in db
             User user = new User(firstName, lastName, email);
             UserDB.insert(user);
+
+            try {
+                MailUtil.sendWelcomeEmail(user);
+            } catch (MessagingException e) {
+                throw new ServletException(
+                    "Could not send welcome email.",
+                    e
+                );
+            }
             
             // set User object in request object and set URL
             request.setAttribute("user", user);
